@@ -73,7 +73,7 @@ function App() {
               onChange={handleChange}
               min="140"
               max="200"
-              step="0.1"
+              step="1"
               required
               style={{ marginLeft: "0.5rem" }}
             />
@@ -90,7 +90,7 @@ function App() {
               onChange={handleChange}
               min="20"
               max="150"
-              step="0.1"
+              step="1"
               required
               style={{ marginLeft: "0.5rem" }}
             />
