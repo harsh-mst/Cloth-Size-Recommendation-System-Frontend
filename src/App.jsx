@@ -35,7 +35,7 @@ function App() {
         waist_size: form.waist_size || null,
       };
 
-      const resp = await fetch("http://localhost:8000/predict", {
+      const resp = await fetch("https://cloth-size-recommendation-system.onrender.com/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
