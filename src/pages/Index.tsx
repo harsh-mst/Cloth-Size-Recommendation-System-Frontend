@@ -24,11 +24,11 @@ interface SizeRow {
 
 const SIZE_CHART: SizeRow[] = [
   { size: "XS", heightCm: "150–160", weightKg: "45–55", chestCm: "76–84", waistCm: "60–68" },
-  { size: "S",  heightCm: "158–168", weightKg: "54–64", chestCm: "84–92", waistCm: "68–76" },
-  { size: "M",  heightCm: "166–176", weightKg: "63–75", chestCm: "92–100", waistCm: "76–84" },
-  { size: "L",  heightCm: "174–184", weightKg: "74–88", chestCm: "100–108", waistCm: "84–92" },
+  { size: "S", heightCm: "158–168", weightKg: "54–64", chestCm: "84–92", waistCm: "68–76" },
+  { size: "M", heightCm: "166–176", weightKg: "63–75", chestCm: "92–100", waistCm: "76–84" },
+  { size: "L", heightCm: "174–184", weightKg: "74–88", chestCm: "100–108", waistCm: "84–92" },
   { size: "XL", heightCm: "180–190", weightKg: "87–102", chestCm: "108–116", waistCm: "92–100" },
-  { size: "XXL",heightCm: "188–198", weightKg: "100–120", chestCm: "116–124", waistCm: "100–108" },
+  { size: "XXL", heightCm: "188–198", weightKg: "100–120", chestCm: "116–124", waistCm: "100–108" },
 ];
 
 const SIZES: SizeOption[] = ["XS", "S", "M", "L", "XL", "XXL"];
@@ -50,11 +50,11 @@ function getRecommendedSize(
 
   const ranges = [
     { size: "XS" as SizeOption, hMin: 150, hMax: 160, wMin: 45, wMax: 55 },
-    { size: "S"  as SizeOption, hMin: 158, hMax: 168, wMin: 54, wMax: 64 },
-    { size: "M"  as SizeOption, hMin: 166, hMax: 176, wMin: 63, wMax: 75 },
-    { size: "L"  as SizeOption, hMin: 174, hMax: 184, wMin: 74, wMax: 88 },
+    { size: "S" as SizeOption, hMin: 158, hMax: 168, wMin: 54, wMax: 64 },
+    { size: "M" as SizeOption, hMin: 166, hMax: 176, wMin: 63, wMax: 75 },
+    { size: "L" as SizeOption, hMin: 174, hMax: 184, wMin: 74, wMax: 88 },
     { size: "XL" as SizeOption, hMin: 180, hMax: 190, wMin: 87, wMax: 102 },
-    { size: "XXL"as SizeOption, hMin: 188, hMax: 200, wMin: 100, wMax: 120 },
+    { size: "XXL" as SizeOption, hMin: 188, hMax: 200, wMin: 100, wMax: 120 },
   ];
 
   // Exact match
@@ -96,11 +96,11 @@ function convertRow(row: SizeRow, unit: Unit): SizeRow {
 
 const SIZE_COLOR: Record<SizeOption, string> = {
   XS: "hsl(255,75%,55%)",
-  S:  "hsl(275,80%,50%)",
-  M:  "hsl(315,85%,52%)",
-  L:  "hsl(330,85%,55%)",
+  S: "hsl(275,80%,50%)",
+  M: "hsl(315,85%,52%)",
+  L: "hsl(330,85%,55%)",
   XL: "hsl(15,90%,55%)",
-  XXL:"hsl(35,90%,52%)",
+  XXL: "hsl(35,90%,52%)",
 };
 
 const Index = () => {
@@ -147,7 +147,7 @@ const Index = () => {
         <div className="relative z-10 flex flex-col items-center justify-center py-16 px-4 text-center">
           <div className="flex items-center gap-2 mb-4">
             <Shirt className="w-8 h-8 text-white/90" />
-            <span className="text-white/70 text-sm font-semibold tracking-widest uppercase">FitFinder</span>
+            <span className="text-white/70 text-sm font-semibold tracking-widest uppercase">TrytoFit</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-3 leading-tight tracking-tight">
             Find Your <span className="text-yellow-300">Perfect</span> Fit
@@ -176,21 +176,19 @@ const Index = () => {
                 <div className="inline-flex rounded-full p-1 bg-muted">
                   <button
                     onClick={() => { setUnit("metric"); setResult(null); setHeight(""); setWeight(""); }}
-                    className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                      unit === "metric"
+                    className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${unit === "metric"
                         ? "gradient-cta text-primary-foreground shadow-cta"
                         : "text-muted-foreground hover:text-foreground"
-                    }`}
+                      }`}
                   >
                     cm / kg
                   </button>
                   <button
                     onClick={() => { setUnit("imperial"); setResult(null); setHeight(""); setWeight(""); }}
-                    className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                      unit === "imperial"
+                    className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${unit === "imperial"
                         ? "gradient-cta text-primary-foreground shadow-cta"
                         : "text-muted-foreground hover:text-foreground"
-                    }`}
+                      }`}
                   >
                     in / lbs
                   </button>
@@ -247,11 +245,10 @@ const Index = () => {
                     <button
                       key={s}
                       onClick={() => setChest(chest === s ? "" : s)}
-                      className={`w-12 h-10 rounded-lg text-sm font-bold border-2 transition-all duration-200 ${
-                        chest === s
+                      className={`w-12 h-10 rounded-lg text-sm font-bold border-2 transition-all duration-200 ${chest === s
                           ? "border-primary text-primary-foreground shadow-sm"
                           : "border-border text-muted-foreground hover:border-primary hover:text-primary"
-                      }`}
+                        }`}
                       style={chest === s ? { background: SIZE_COLOR[s], borderColor: SIZE_COLOR[s] } : {}}
                     >
                       {s}
@@ -268,11 +265,10 @@ const Index = () => {
                     <button
                       key={s}
                       onClick={() => setWaist(waist === s ? "" : s)}
-                      className={`w-12 h-10 rounded-lg text-sm font-bold border-2 transition-all duration-200 ${
-                        waist === s
+                      className={`w-12 h-10 rounded-lg text-sm font-bold border-2 transition-all duration-200 ${waist === s
                           ? "border-secondary text-secondary-foreground shadow-sm"
                           : "border-border text-muted-foreground hover:border-secondary hover:text-secondary"
-                      }`}
+                        }`}
                       style={waist === s ? { background: SIZE_COLOR[s], borderColor: SIZE_COLOR[s] } : {}}
                     >
                       {s}
@@ -327,11 +323,10 @@ const Index = () => {
                   {result.size}
                 </div>
                 <Badge
-                  className={`mb-4 text-sm font-bold px-4 py-1 ${
-                    result.exact
+                  className={`mb-4 text-sm font-bold px-4 py-1 ${result.exact
                       ? "bg-green-400/30 text-green-100 border border-green-300/40"
                       : "bg-yellow-400/30 text-yellow-100 border border-yellow-300/40"
-                  }`}
+                    }`}
                 >
                   {result.exact ? "✓ Exact match" : "~ Closest match"}
                 </Badge>
@@ -401,18 +396,16 @@ const Index = () => {
                         return (
                           <tr
                             key={row.size}
-                            className={`border-b border-border transition-colors ${
-                              isHighlighted
+                            className={`border-b border-border transition-colors ${isHighlighted
                                 ? "text-white font-bold"
                                 : i % 2 === 0 ? "bg-muted/30" : "bg-background"
-                            }`}
+                              }`}
                             style={isHighlighted ? { background: SIZE_COLOR[row.size] } : {}}
                           >
                             <td className="px-5 py-3">
                               <span
-                                className={`inline-flex items-center justify-center w-10 h-8 rounded-lg text-xs font-extrabold ${
-                                  isHighlighted ? "bg-white/20 text-white" : "bg-muted text-foreground"
-                                }`}
+                                className={`inline-flex items-center justify-center w-10 h-8 rounded-lg text-xs font-extrabold ${isHighlighted ? "bg-white/20 text-white" : "bg-muted text-foreground"
+                                  }`}
                               >
                                 {row.size}
                               </span>
@@ -438,12 +431,12 @@ const Index = () => {
         <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Shirt className="w-5 h-5 text-primary" />
-            <span className="font-bold text-foreground">FitFinder</span>
+            <span className="font-bold text-foreground">TrytoFit</span>
           </div>
           <p className="text-sm text-muted-foreground text-center">
             Your perfect fit, every time. Size charts are general guidelines — always try before you buy.
           </p>
-          <p className="text-xs text-muted-foreground">© 2026 FitFinder</p>
+          <p className="text-xs text-muted-foreground">© 2026 TrytoFit</p>
         </div>
       </footer>
     </div>
