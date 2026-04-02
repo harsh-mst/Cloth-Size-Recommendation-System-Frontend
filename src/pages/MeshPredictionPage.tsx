@@ -40,11 +40,11 @@ interface MeshWarning {
 
 const SIZE_CHART: SizeRow[] = [
   { size: "XS", heightCm: "150–160", weightKg: "45–55", chestCm: "76–84", waistCm: "60–68" },
-  { size: "S",  heightCm: "158–168", weightKg: "54–64", chestCm: "84–92",  waistCm: "68–76" },
-  { size: "M",  heightCm: "166–176", weightKg: "63–75", chestCm: "92–100", waistCm: "76–84" },
-  { size: "L",  heightCm: "174–184", weightKg: "74–88", chestCm: "100–108",waistCm: "84–92" },
-  { size: "XL", heightCm: "180–190", weightKg: "87–102",chestCm: "108–116",waistCm: "92–100" },
-  { size: "XXL",heightCm: "188–198", weightKg: "100–120",chestCm:"116–124",waistCm: "100–108" },
+  { size: "S", heightCm: "158–168", weightKg: "54–64", chestCm: "84–92", waistCm: "68–76" },
+  { size: "M", heightCm: "166–176", weightKg: "63–75", chestCm: "92–100", waistCm: "76–84" },
+  { size: "L", heightCm: "174–184", weightKg: "74–88", chestCm: "100–108", waistCm: "84–92" },
+  { size: "XL", heightCm: "180–190", weightKg: "87–102", chestCm: "108–116", waistCm: "92–100" },
+  { size: "XXL", heightCm: "188–198", weightKg: "100–120", chestCm: "116–124", waistCm: "100–108" },
 ];
 
 const SIZES: SizeOption[] = ["S", "M", "L"];
@@ -67,11 +67,11 @@ function convertRow(row: SizeRow, unit: Unit): SizeRow {
 }
 
 const SIZE_COLOR: Record<SizeOption, string> = {
-  XS:  "hsl(255,75%,55%)",
-  S:   "hsl(275,80%,50%)",
-  M:   "hsl(315,85%,52%)",
-  L:   "hsl(330,85%,55%)",
-  XL:  "hsl(15,90%,55%)",
+  XS: "hsl(255,75%,55%)",
+  S: "hsl(275,80%,50%)",
+  M: "hsl(315,85%,52%)",
+  L: "hsl(330,85%,55%)",
+  XL: "hsl(15,90%,55%)",
   XXL: "hsl(35,90%,52%)",
 };
 
@@ -269,7 +269,14 @@ const MeshPredictionPage = () => {
       const chestValue = chestCm !== "" ? Number(chestCm) : (chest ? SIZE_TO_CHEST_CM[chest] : 96);
       const waistValue = waistCm !== "" ? Number(waistCm) : (waist ? SIZE_TO_WAIST_CM[waist] : 80);
 
-      const modelResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate-mesh`, {
+      setGeneratingModel(true);
+      if (modelBlobUrlRef.current) {
+        URL.revokeObjectURL(modelBlobUrlRef.current);
+        modelBlobUrlRef.current = null;
+      }
+      setModelUrl(null);
+
+      const outfitResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate-outfit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -283,15 +290,33 @@ const MeshPredictionPage = () => {
         }),
       });
 
-      if (modelResponse.ok) {
-        const blob = await modelResponse.blob();
+      if (outfitResponse.ok) {
+        const blob = await outfitResponse.blob();
+        console.log("Outfit blob size:", blob.size); 
         const blobUrl = URL.createObjectURL(blob);
         modelBlobUrlRef.current = blobUrl;
         setModelUrl(blobUrl);
       } else {
-        console.error("3D model generation failed:", await modelResponse.text());
+        const bodyResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate-mesh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            height: heightCmValue,
+            weight: weightKgValue,
+            gender,
+            chest_size: chest || "M",
+            waist_size: waist || "M",
+          }),
+        });
+        if (bodyResponse.ok) {
+          const blob = await bodyResponse.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          modelBlobUrlRef.current = blobUrl;
+          setModelUrl(blobUrl);
+        }
       }
-    } catch (error) {
+
+    } catch (error) {                          // ← closes the try { opened by handleSubmit
       console.error("Prediction or Model generation failed:", error);
     } finally {
       setLoading(false);
@@ -366,11 +391,10 @@ const MeshPredictionPage = () => {
                       key={g}
                       type="button"
                       onClick={() => setGender(g)}
-                      className={`px-5 py-2 rounded-lg text-sm font-bold border-2 transition-all duration-200 capitalize ${
-                        gender === g
+                      className={`px-5 py-2 rounded-lg text-sm font-bold border-2 transition-all duration-200 capitalize ${gender === g
                           ? "bg-primary text-primary-foreground border-primary"
                           : "border-border text-muted-foreground hover:border-primary hover:text-primary"
-                      }`}
+                        }`}
                     >
                       {g}
                     </button>
@@ -428,11 +452,10 @@ const MeshPredictionPage = () => {
                       type="button"
                       key={s}
                       onClick={() => setChest(chest === s ? "" : s)}
-                      className={`w-12 h-10 rounded-lg text-sm font-bold border-2 transition-all duration-200 ${
-                        chest === s
+                      className={`w-12 h-10 rounded-lg text-sm font-bold border-2 transition-all duration-200 ${chest === s
                           ? "border-primary text-primary-foreground shadow-sm"
                           : "border-border text-muted-foreground hover:border-primary hover:text-primary"
-                      }`}
+                        }`}
                       style={chest === s ? { background: SIZE_COLOR[s], borderColor: SIZE_COLOR[s] } : {}}
                     >
                       {s}
@@ -452,11 +475,10 @@ const MeshPredictionPage = () => {
                       type="button"
                       key={s}
                       onClick={() => setWaist(waist === s ? "" : s)}
-                      className={`w-12 h-10 rounded-lg text-sm font-bold border-2 transition-all duration-200 ${
-                        waist === s
+                      className={`w-12 h-10 rounded-lg text-sm font-bold border-2 transition-all duration-200 ${waist === s
                           ? "border-secondary text-secondary-foreground shadow-sm"
                           : "border-border text-muted-foreground hover:border-secondary hover:text-secondary"
-                      }`}
+                        }`}
                       style={waist === s ? { background: SIZE_COLOR[s], borderColor: SIZE_COLOR[s] } : {}}
                     >
                       {s}
@@ -582,9 +604,8 @@ const MeshPredictionPage = () => {
                         return (
                           <tr
                             key={row.size}
-                            className={`border-b border-border transition-colors ${
-                              isHighlighted ? "text-white font-bold" : i % 2 === 0 ? "bg-muted/30" : "bg-background"
-                            }`}
+                            className={`border-b border-border transition-colors ${isHighlighted ? "text-white font-bold" : i % 2 === 0 ? "bg-muted/30" : "bg-background"
+                              }`}
                             style={isHighlighted ? { background: SIZE_COLOR[row.size] } : {}}
                           >
                             <td className="px-5 py-3">

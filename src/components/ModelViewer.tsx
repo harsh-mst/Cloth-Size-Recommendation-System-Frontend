@@ -1,125 +1,62 @@
-import React, { useEffect, useRef } from 'react';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+// components/ModelViewer.tsx
+import { useEffect, useRef } from "react";
+
+// Declare model-viewer as a custom JSX element for TypeScript
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      "model-viewer": React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & {
+          src?: string;
+          alt?: string;
+          "camera-controls"?: boolean;
+          "auto-rotate"?: boolean;
+          "shadow-intensity"?: string;
+          "camera-orbit"?: string;
+          exposure?: string;
+          ar?: boolean;
+        },
+        HTMLElement
+      >;
+    }
+  }
+}
 
 interface ModelViewerProps {
   modelUrl: string;
+  tshirtUrl?: string;   // optional separate shirt GLB
 }
 
-const ModelViewer: React.FC<ModelViewerProps> = ({ modelUrl }) => {
-  const mountRef = useRef<HTMLDivElement>(null);
-
+export default function ModelViewer({ modelUrl, tshirtUrl }: ModelViewerProps) {
+  // Inject model-viewer script once
   useEffect(() => {
-    if (!mountRef.current) return;
+    if (document.querySelector('script[data-mv]')) return;
+    const script = document.createElement("script");
+    script.type = "module";
+    script.src = "https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js";
+    script.setAttribute("data-mv", "1");
+    document.head.appendChild(script);
+  }, []);
 
-    const container = mountRef.current;
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf3f4f6);
-
-    const width = container.clientWidth || 800;
-    const height = container.clientHeight || 500;
-
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 3);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    container.appendChild(renderer.domElement);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
-    scene.add(ambientLight);
-
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
-    dirLight1.position.set(3, 3, 3);
-    scene.add(dirLight1);
-
-    const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight2.position.set(-3, 2, -3);
-    scene.add(dirLight2);
-
-    let model: THREE.Object3D | null = null;
-
-    const loader = new GLTFLoader();
-    loader.load(
-      modelUrl,
-      (gltf) => {
-        model = gltf.scene;
-
-        const box = new THREE.Box3().setFromObject(model);
-        const size = box.getSize(new THREE.Vector3());
-        const center = box.getCenter(new THREE.Vector3());
-
-        const maxDim = Math.max(size.x, size.y, size.z);
-        if (maxDim > 0) {
-          const scale = 2 / maxDim;
-          model.scale.setScalar(scale);
-        }
-
-        const scaledBox = new THREE.Box3().setFromObject(model);
-        const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
-        model.position.set(-scaledCenter.x, -scaledCenter.y, -scaledCenter.z);
-
-        scene.add(model);
-      },
-      undefined,
-      (error) => {
-        console.error('Failed to load GLB model:', error);
-      }
-    );
-
-    let frameId = 0;
-    const animate = () => {
-      frameId = requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    const handleResize = () => {
-      const newWidth = container.clientWidth || 800;
-      const newHeight = container.clientHeight || 500;
-      camera.aspect = newWidth / newHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(newWidth, newHeight);
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(frameId);
-      controls.dispose();
-
-      if (model) {
-        scene.remove(model);
-        model.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.geometry.dispose();
-            if (Array.isArray(child.material)) {
-              child.material.forEach((material) => material.dispose());
-            } else {
-              child.material.dispose();
-            }
-          }
-        });
-      }
-
-      renderer.dispose();
-
-      if (container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
-      }
-    };
-  }, [modelUrl]);
-
-  return <div ref={mountRef} className="w-full h-full min-h-[500px] rounded-lg overflow-hidden" />;
-};
-
-export default ModelViewer;
+  return (
+    <div className="w-full h-full relative rounded-xl overflow-hidden bg-gradient-to-b from-primary/5 to-secondary/5">
+      {/* model-viewer only accepts ONE src — so you combine them server-side */}
+      <model-viewer
+        key={modelUrl}
+        src={modelUrl}
+        alt="3D body and outfit preview"
+        camera-controls
+        auto-rotate
+        shadow-intensity="1.2"
+        exposure="0.9"
+        camera-orbit="0deg 75deg 2.5m"
+        style={{ width: "100%", height: "100%", minHeight: "400px", background: "transparent" }}
+      />
+      <div className="absolute bottom-3 left-0 right-0 flex justify-center">
+        <span className="text-xs text-muted-foreground bg-background/70 backdrop-blur-sm px-3 py-1 rounded-full">
+          Drag to rotate · Scroll to zoom
+        </span>
+      </div>
+    </div>
+  );
+}
