@@ -49,7 +49,7 @@ export default function ModelViewer({ modelUrl, tshirtUrl }: ModelViewerProps) {
         auto-rotate
         shadow-intensity="1.2"
         exposure="0.9"
-        camera-orbit="0deg 75deg 2.5m"
+        camera-orbit="0deg 75deg 105%"
         style={{ width: "100%", height: "100%", minHeight: "400px", background: "transparent" }}
       />
       <div className="absolute bottom-3 left-0 right-0 flex justify-center">

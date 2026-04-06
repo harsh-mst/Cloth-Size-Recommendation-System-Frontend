@@ -316,10 +316,52 @@ const MeshPredictionPage = () => {
         }
       }
 
-    } catch (error) {                          // ← closes the try { opened by handleSubmit
+    } catch (error) {
       console.error("Prediction or Model generation failed:", error);
     } finally {
       setLoading(false);
+      setGeneratingModel(false);
+    }
+  };
+
+  const handleTryOnShirt = async (size: string) => {
+    setGeneratingModel(true);
+    try {
+      let heightCmValue: number;
+      if (unit === "imperial") {
+        heightCmValue = (Number(heightFeet) * 12 + Number(heightInches)) * 2.54;
+      } else {
+        heightCmValue = Number(height);
+      }
+      const weightKgValue = unit === "imperial" ? Number(weight) * 0.453592 : Number(weight);
+
+      const outfitResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate-outfit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          height: heightCmValue,
+          weight: weightKgValue,
+          gender,
+          selected_shirt_size: size,
+        }),
+      });
+
+      if (outfitResponse.ok) {
+        if (modelBlobUrlRef.current) {
+          URL.revokeObjectURL(modelBlobUrlRef.current);
+          modelBlobUrlRef.current = null;
+        }
+        setModelUrl(null); // Clear to show loader if needed, but modelUrl change updates the view
+        const blob = await outfitResponse.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        modelBlobUrlRef.current = blobUrl;
+        setModelUrl(blobUrl);
+      } else {
+        console.error("Failed to generate outfit for size", size);
+      }
+    } catch (error) {
+      console.error("Try on failed:", error);
+    } finally {
       setGeneratingModel(false);
     }
   };
@@ -527,7 +569,35 @@ const MeshPredictionPage = () => {
 
             <div className="flex flex-col items-center justify-center p-6 md:p-10 bg-gradient-to-br from-primary/5 to-secondary/5 relative min-h-[400px]">
               {modelUrl ? (
-                <ModelViewer modelUrl={modelUrl} />
+                <>
+                  <div className="w-full flex-1 min-h-[400px] relative">
+                    <ModelViewer modelUrl={modelUrl} />
+                  </div>
+                  <div className="mt-6 w-full flex flex-col items-center">
+                    <Label className="text-sm font-semibold mb-3 text-foreground">
+                      Try On specific Shirt Size
+                    </Label>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {["S", "M", "L", "XL", "XXL"].map((s) => (
+                        <button
+                          type="button"
+                          key={s}
+                          onClick={() => handleTryOnShirt(s)}
+                          disabled={generatingModel || loading}
+                          className="w-12 h-10 rounded-lg text-sm font-bold border-2 border-border text-muted-foreground hover:border-primary hover:text-primary transition-all disabled:opacity-50"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {generatingModel && (
+                    <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center flex-col gap-4 z-20">
+                      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                      <p className="text-foreground font-bold animate-pulse">Changing Clothes...</p>
+                    </div>
+                  )}
+                </>
               ) : (
                 <>
                   <BodySilhouette unit={unit} />
